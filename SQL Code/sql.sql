@@ -11,7 +11,6 @@ INSERT INTO movie(M_ID, Name, Length, Rating) VALUES ('M01', 'Avatar', 300, '13'
 INSERT INTO movie(M_ID, Name, Length, Rating, Synopsis, Genre) VALUES ('M02', 'Avengers: Infinity War', 280, '13', '-', '-');
 INSERT INTO movie(M_ID, Name, Length, Rating, Synopsis, Genre) VALUES ('M03', 'Avengers: Endgame', 246, '13', '-', '-');
 
-
 CREATE TABLE hall(
 	H_ID varchar(12) PRIMARY KEY
 );
@@ -30,6 +29,7 @@ CREATE TABLE showing_time(
 		CONSTRAINT st_fk_hall FOREIGN KEY (H_ID) REFERENCES hall(H_ID)
 );
 
+--
 INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('STO1', TO_DATE('01/01/19', 'DD/MM/YY'), '0830', 'M01', 'H01');
 INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('STO2', TO_DATE('03/01/19', 'DD/MM/YY'), '1030', 'M02', 'H03');
 INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('STO3', TO_DATE('27/01/19', 'DD/MM/YY'), '1400', 'M03', 'H01');
@@ -74,7 +74,8 @@ CREATE TABLE ticket(
 	E_ID varchar(12) NOT NULL,
 		CONSTRAINT t_fk_employee FOREIGN KEY (E_ID) REFERENCES employee(E_ID)
 );
-	
+
+--trigger for unavailable seat
 CREATE OR REPLACE TRIGGER Ticket_Seat_Avail
 	BEFORE INSERT ON ticket
 	DECLARE
@@ -88,6 +89,7 @@ CREATE OR REPLACE TRIGGER Ticket_Seat_Avail
 		ENDIF;
 	END;
 
+--rework this trigger to mark sets as taken
 CREATE OR REPLACE TRIGGER Seat_Sold
 	AFTER INSERT ON ticket
 	BEGIN
@@ -96,7 +98,7 @@ CREATE OR REPLACE TRIGGER Seat_Sold
 		WHERE S_Row = :OLD.S_Row AND S_No = :OLD.S_No
 	END;
 
-	--create trigger to check if showing time and hall clash???
+--create trigger to check if showing time and hall clash???
 
 CREATE ROLE manager;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticket TO manager;
