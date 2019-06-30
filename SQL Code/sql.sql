@@ -1,7 +1,7 @@
 CREATE TABLE movie(
 	M_ID varchar(12) PRIMARY KEY,
 	Name varchar(25) NOT NULL,
-	Length number(4) NOT NULL,
+	Length int(4) NOT NULL,
 	Rating varchar(25) NOT NULL,
 	Synopsis varchar(300) DEFAULT 'No synopsis found.',
 	Genre varchar(300) DEFAULT 'No info found.'
