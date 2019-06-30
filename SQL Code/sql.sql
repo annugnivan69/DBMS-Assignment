@@ -74,28 +74,44 @@ CREATE TABLE ticket(
 	CONSTRAINT t_fk_seats FOREIGN KEY (S_Row, S_No, ST_ID, H_ID) REFERENCES seats(S_Row, S_No, ST_ID, H_ID)
 );
 	
+--trigger to look or unavailable seat
 CREATE OR REPLACE TRIGGER Ticket_Seat_Avail
-	BEFORE INSERT ON ticket
-	DECLARE
-		CREATE OR REPLACE VIEW seat_avail AS
-			SELECT Availability 
-			FROM seats 
-			WHERE S_Row = :OLD.S_Row AND S_No = :OLD.S_No
-	BEGIN
-		IF seat_avail = 'N'		
-			raise_application_error(-00001, 'That seat is unavailable')
-		ENDIF;
-	END;
+BEFORE INSERT ON ticket
+for each row
+DECLARE
+	v_s_row varchar(1);
+	v_s_seat varchar(2);
+	v_seat_avail seats.Availability%Type;
+BEGIN
+	v_s_row := :new.S_Row;
+	v_s_seat := :new.S_No;
 
+	select Availability into v_seat_avail
+	from seats
+	WHERE S_Row = v_s_row and S_No = v_s_seat;
+
+	if v_seat_avail = 'N' then
+		raise_application_error(-20069, 'Seat is taken');
+	end if;
+END;
+/
+
+--trigger to mark taken seats as taken
 CREATE OR REPLACE TRIGGER Seat_Sold
-	AFTER INSERT ON ticket
-	BEGIN
-		UPDATE seats
-		SET Availability = 'N'
-		WHERE S_Row = :OLD.S_Row AND S_No = :OLD.S_No
-	END;
+AFTER INSERT ON ticket
+FOR EACH ROW 
+declare
+	v_s_row varchar(1);
+	v_s_seat varchar(2);
+BEGIN
+	v_s_row := :new.S_Row;
+	v_s_seat := :new.S_No;
 
-	--create trigger to check if showing time and hall clash???
+	update seats
+	set Availability = 'N'
+	WHERE S_Row = v_s_row and S_No = v_s_seat;
+END;
+/
 
 CREATE ROLE manager;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticket TO manager;
