@@ -30,9 +30,9 @@ CREATE TABLE showing_time(
 		CONSTRAINT st_fk_hall FOREIGN KEY (H_ID) REFERENCES hall(H_ID)
 );
 
-INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('STO1', TO_DATE('01/01/19', 'DD/MM/YY'), '0830', 'M01', 'H01');
-INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('STO2', TO_DATE('03/01/19', 'DD/MM/YY'), '1030', 'M02', 'H03');
-INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('STO3', TO_DATE('27/01/19', 'DD/MM/YY'), '1400', 'M03', 'H01');
+INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('ST01', TO_DATE('01/01/19', 'DD/MM/YY'), '0830', 'M01', 'H01');
+INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('ST02', TO_DATE('03/01/19', 'DD/MM/YY'), '1030', 'M02', 'H03');
+INSERT INTO showing_time(ST_ID, ST_DATE, ST_TIME, M_ID, H_ID) VALUES ('ST03', TO_DATE('27/01/19', 'DD/MM/YY'), '1400', 'M03', 'H01');
 
 CREATE TABLE seats(
 	S_Row varchar(1) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE seats(
 		CONSTRAINT s_pk PRIMARY KEY (S_Row, S_No, H_ID, ST_ID)
 );
 
-INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('A', '1', 'H01', 'ST01', '10.00', 'Y');
+INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('A', '1', 'H01', 'ST01', '5.00', 'Y');
 INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('H', '22', 'H03', 'ST02', '10.00', 'Y');
 INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('J', '6', 'H01', 'ST03', '10.00', 'Y');
 
