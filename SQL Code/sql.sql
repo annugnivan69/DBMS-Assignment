@@ -57,11 +57,6 @@ CREATE TABLE employee(
 	Position varchar(30) NOT NULL
 );
 
-					--SELECT seats.S_Row, seats.S_No, seats.H_ID, seats.ST_ID, s.Availability
-					--FROM seats 
-					--JOIN ticket
-
-
 INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E01', 'John', 'Manager');
 INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E02', 'Mary', 'Cashier');
 
