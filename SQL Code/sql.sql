@@ -41,7 +41,7 @@ CREATE TABLE seats(
 		CONSTRAINT s_fk_hall FOREIGN KEY (H_ID) REFERENCES hall(H_ID),
 	ST_ID varchar(12) NOT NULL,
 		CONSTRAINT s_fk_showing_time FOREIGN KEY (ST_ID) REFERENCES showing_time(ST_ID),
-	Price decimal(3,2) NOT NULL,
+	Price decimal(5,2) NOT NULL,
 	Availability varchar(1) DEFAULT 'Y',
 		constraint chk_avail CHECK(availability in ('Y', 'N')),
 		CONSTRAINT s_pk PRIMARY KEY (S_Row, S_No, H_ID, ST_ID)
@@ -57,9 +57,9 @@ CREATE TABLE employee(
 	Position varchar(30) NOT NULL
 );
 
-					SELECT seats.S_Row, seats.S_No, seats.H_ID, seats.ST_ID, s.Availability
-					FROM seats 
-					JOIN ticket
+					--SELECT seats.S_Row, seats.S_No, seats.H_ID, seats.ST_ID, s.Availability
+					--FROM seats 
+					--JOIN ticket
 
 
 INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E01', 'John', 'Manager');
@@ -68,13 +68,10 @@ INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E02', 'Mary', 'Cashier');
 CREATE TABLE ticket(
 	T_ID varchar(12) PRIMARY KEY,
 	ST_ID varchar(12) NOT NULL,
-		CONSTRAINT t_fk_showing_time FOREIGN KEY (ST_ID) REFERENCES showing_time(ST_ID),
 	H_ID varchar(12) NOT NULL,
-		CONSTRAINT t_fk_hall FOREIGN KEY (H_ID) REFERENCES hall(H_ID),
 	S_Row varchar(1) NOT NULL,
-		CONSTRAINT t_fk_s_row FOREIGN KEY (S_Row) REFERENCES seats(S_Row),
 	S_No varchar(2) NOT NULL,
-		CONSTRAINT t_fk_s_no FOREIGN KEY (S_No) REFERENCES seats(S_No)
+	CONSTRAINT t_fk_seats FOREIGN KEY (S_Row, S_No, ST_ID, H_ID) REFERENCES seats(S_Row, S_No, ST_ID, H_ID)
 );
 	
 CREATE OR REPLACE TRIGGER Ticket_Seat_Avail
@@ -111,12 +108,3 @@ GRANT INSERT ON ticket TO cashier;
 GRANT SELECT ON showing_time TO cashier;
 CREATE USER mary IDENTIFIED BY pwd;
 GRANT cashier TO mary;
-	
-	
-
-
-
-
-
-
-	
