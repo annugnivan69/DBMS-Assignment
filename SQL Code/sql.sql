@@ -47,7 +47,7 @@ CREATE TABLE seats(
 		CONSTRAINT s_pk PRIMARY KEY (S_Row, S_No, H_ID, ST_ID)
 );
 
-INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('A', '1', 'H01', 'ST01', '5.00', 'Y');
+INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('A', '1', 'H01', 'ST01', '10.00', 'Y');
 INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('H', '22', 'H03', 'ST02', '10.00', 'Y');
 INSERT INTO seats(S_Row, S_No, H_ID, ST_ID, Price, Availability) VALUES ('J', '6', 'H01', 'ST03', '10.00', 'Y');
 
@@ -57,13 +57,8 @@ CREATE TABLE employee(
 	Position varchar(30) NOT NULL
 );
 
-					--SELECT seats.S_Row, seats.S_No, seats.H_ID, seats.ST_ID, s.Availability
-					--FROM seats 
-					--JOIN ticket
-
-
-INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E01', 'John', 'Manager');
-INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E02', 'Mary', 'Cashier');
+INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E01', 'Mike', 'Manager');
+INSERT INTO employee(E_ID, E_Name, Position) VALUES ('E02', 'Amy', 'Cashier');
 
 CREATE TABLE ticket(
 	T_ID varchar(12) PRIMARY KEY,
@@ -73,38 +68,73 @@ CREATE TABLE ticket(
 	S_No varchar(2) NOT NULL,
 	CONSTRAINT t_fk_seats FOREIGN KEY (S_Row, S_No, ST_ID, H_ID) REFERENCES seats(S_Row, S_No, ST_ID, H_ID)
 );
-	
+	--INSERT INTO ticket VALUES('T01', 'ST01', 'H01', 'A', '1')
+
 CREATE OR REPLACE TRIGGER Ticket_Seat_Avail
 	BEFORE INSERT ON ticket
+	for each row
 	DECLARE
-		CREATE OR REPLACE VIEW seat_avail AS
-			SELECT Availability 
-			FROM seats 
-			WHERE S_Row = :OLD.S_Row AND S_No = :OLD.S_No
+		v_s_row varchar(1);
+		v_s_seat varchar(2);
+		v_seat_avail seats.Availability%Type;
 	BEGIN
-		IF seat_avail = 'N'		
-			raise_application_error(-00001, 'That seat is unavailable')
-		ENDIF;
+		v_s_row := :new.S_Row;
+		v_s_seat := :new.S_No;
+
+		select Availability into v_seat_avail
+		from seats
+		WHERE S_Row = v_s_row and S_No = v_s_seat;
+
+		if v_seat_avail = 'N' then
+			raise_application_error(-20069, 'Seat is taken');
+		end if;
 	END;
 
 CREATE OR REPLACE TRIGGER Seat_Sold
 	AFTER INSERT ON ticket
+	FOR EACH ROW 
+	DECLARE
+		v_s_row varchar(1);
+		v_s_seat varchar(2);
 	BEGIN
-		UPDATE seats
-		SET Availability = 'N'
-		WHERE S_Row = :OLD.S_Row AND S_No = :OLD.S_No
-	END;
+  		v_s_row := :new.S_Row;
+    		v_s_seat := :new.S_No;
 
-	--create trigger to check if showing time and hall clash???
+		update seats
+		set Availability = 'N'
+		WHERE S_Row = v_s_row and S_No = v_s_seat;
+END;
+
+create tablespace ts DATAFILE 'D:/Temp/ts.dbf' size 50M;
+--@?/sqlplus/admin/pupbld.sql
 
 CREATE ROLE manager;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ticket TO manager;
+GRANT UPDATE ON seats TO manager;
 GRANT SELECT ON showing_time TO manager;
-CREATE USER john IDENTIFIED BY pwd;
-GRANT manager TO john;
+GRANT CREATE SESSION TO manager;
+
+CREATE USER MIKE IDENTIFIED BY pwd DEFAULT TABLESPACE ts QUOTA 15M ON ts;
+GRANT manager TO MIKE;
+CREATE SYNONYM MIKE.showing_time for system.showing_time;
+CREATE SYNONYM MIKE.ticket for system.ticket;
+CREATE SYNONYM MIKE.seats for system.seats;
+
+SELECT * FROM showing_time;
+SELECT * FROM ticket;
+INSERT INTO ticket VALUES('T02', 'ST03', 'H01', 'J', '6');
+UPDATE ticket SET ST_ID = 'ST02', H_ID = 'H03', S_Row = 'H', s_No = '22' WHERE T_ID = 'T02';
+DELETE FROM ticket WHERE T_ID = 'T02';
 
 CREATE ROLE cashier;
 GRANT INSERT ON ticket TO cashier;
 GRANT SELECT ON showing_time TO cashier;
-CREATE USER mary IDENTIFIED BY pwd;
-GRANT cashier TO mary;
+GRANT CREATE SESSION TO cashier;
+
+CREATE USER AMY IDENTIFIED BY pwd DEFAULT TABLESPACE ts QUOTA 15M ON ts;
+GRANT cashier TO AMY;
+CREATE SYNONYM AMY.showing_time for system.showing_time;
+CREATE SYNONYM AMY.ticket for system.ticket;
+
+SELECT * FROM showing_time;
+INSERT INTO ticket VALUES('T02', 'ST03', 'H01', 'J', '6');
